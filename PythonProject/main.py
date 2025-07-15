@@ -26,12 +26,15 @@ class Bullet:
         self.speed = speed
         self.damage = damage
         self.is_alive = True
-        # 加载子弹图片
-        if os.path.exists("playerbullet1.png"): # 查找文件避免报错
+        #加载子弹图片
+        if os.path.exists("playerbullet1.png"):
             self.img = pg.image.load("playerbullet1.png")
             self.rect = self.img.get_rect()
-            self.rect.x = self.x
-            self.rect.y = self.y
+        else:
+            self.img = None
+            self.rect = pg.Rect(x, y, 10, 10)
+            #self.rect.x = self.x
+            #self.rect.y = self.y
 
     def update(self):
         """更新子弹位置"""
@@ -58,12 +61,9 @@ class Player(pg.sprite.Sprite):
             'ATTACKING': pg.image.load("playeratk.png")
         }
         self.bullet_image = pg.image.load("playerbullet1.png")
-        self.position = [0, 0]
-        # 子弹发射延迟
-        self.shoot_delay = 300
-        # 子弹冷却时间
+        self.position = [10, 10]
+        self.shoot_delay = 10
         self.shoot_cooldown = 0
-        # 储存发射的子弹
         self.bullets = []
         self.rect = self.images['NORMAL'].get_rect()
 
@@ -73,11 +73,12 @@ class Player(pg.sprite.Sprite):
             self.shoot_cooldown -= 1
         if position:
             self.position = position
+            self.rect.topleft = self.position
 
     def shoot(self):
         """发射子弹"""
         if self.shoot_cooldown == 0:
-            bullet = Bullet(self.rect.centerx - 2, self.rect.top)
+            bullet = Bullet(self.rect.centerx - self.bullet_image.get_width() // 2, self.rect.top-40)
             self.bullets.append(bullet)
             self.shoot_cooldown = self.shoot_delay
 
@@ -96,6 +97,8 @@ class Player(pg.sprite.Sprite):
     def draw(self, screen):
         state_name = PLAYER_STATES[self.state]
         screen.blit(self.images[state_name], self.position)
+
+
 class Game:
     def __init__(self):
         pg.init()
@@ -114,10 +117,12 @@ class Game:
                 if event.button == 1:  # 左键
                     self.player.state = 3
                     self.player.attack_state = 1
-
+                    self.player.shoot()
     def update(self):
         mouse_pos = pg.mouse.get_pos()
         self.player.update(mouse_pos)
+        if self.player.state == 3:
+            self.player.shoot()
         self.player.update_bullets()
 
     def draw(self):
@@ -125,16 +130,18 @@ class Game:
         pg.draw.rect(self.screen, (255, 255, 255), (0, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
         self.player.draw(self.screen)
         self.player.draw_bullets(self.screen)
+        self.player.state = 0
 
     def run(self):
         while self.running:
             self.handle_events()
             self.update()
             self.draw()
-
             pg.display.flip()
             self.clock.tick(FPS)
         pg.quit()
+
+
 if __name__ == "__main__":
     game = Game()
     game.run()
