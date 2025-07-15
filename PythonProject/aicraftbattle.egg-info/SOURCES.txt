@@ -1,0 +1,8 @@
+README.md
+main.py
+pyproject.toml
+aicraftbattle.egg-info/PKG-INFO
+aicraftbattle.egg-info/SOURCES.txt
+aicraftbattle.egg-info/dependency_links.txt
+aicraftbattle.egg-info/requires.txt
+aicraftbattle.egg-info/top_level.txt
